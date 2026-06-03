@@ -1,5 +1,7 @@
 # Agency Agents Router -- Route and orchestrate specialized agents
 
+> Repo：[Staok/agency-agents-router-skill](https://github.com/Staok/agency-agents-router-skill).
+
 ## Overview
 
 If openclaw.json has multiple agents configured under `agents.list`, this skill discovers them and orchestrates appropriate agents for any given task.
