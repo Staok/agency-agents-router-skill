@@ -17,19 +17,22 @@ cd agency-agents-zh
 ./scripts/install.sh --tool openclaw   # Install to ~/.openclaw/
 ```
 
-Restart the OpenClaw gateway. Verify agents appear in `agents.list` in `~/.openclaw/openclaw.json`.
+Restart the OpenClaw gateway `openclaw gateway restart` . Verify agents appear in `agents.list` in `~/.openclaw/openclaw.json`.
 
 ## Installation
 
 ```bash
 cd ~/.openclaw/workspace/skills
-git clone https://github.com/YOUR_USER/agency-agents-router.git
+git clone https://github.com/Staok/agency-agents-router-skill.git
 cd agency-agents-router
 python3 scripts/rebuild_index.py --clone
 # Restart OpenClaw gateway
 ```
 
 The `--clone` flag automatically clones agency-agents-zh to `/tmp` to extract detailed descriptions from each agent's markdown frontmatter. Alternatively, use `--repo /path/to/agency-agents-zh` if the repo is already cloned locally.
+
+
+Or download and use skill from ClawHub: [Agency Agents Router — ClawHub](https://clawhub.ai/staok/agency-agents-router).
 
 ## Usage
 

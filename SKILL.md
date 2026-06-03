@@ -8,6 +8,33 @@ If openclaw.json has multiple agents configured under `agents.list`, this skill 
 
 In a default OpenClaw setup, only the `main` agent's prompt is active. Other configured agents are invisible. Agent Router solves this by injecting agent awareness and orchestration logic into the main agent's prompt.
 
+### Prerequisites
+
+This skill is the **router** — the agent definitions must be installed separately. Without them, `agents.json` will be empty and no orchestration can happen.
+
+**User (manual):** Install agency-agents-zh agents, then restart gateway:
+
+```bash
+git clone https://github.com/jnMetaCode/agency-agents-zh.git
+cd agency-agents-zh
+./scripts/convert.sh --tool openclaw
+./scripts/install.sh --tool openclaw
+
+# Restart OpenClaw gateway
+openclaw gateway restart
+```
+
+**Agent (auto):** After user confirms installation, the agent runs:
+
+```bash
+cd ~/.openclaw/workspace/skills/agency-agents-router
+python3 scripts/rebuild_index.py --clone
+```
+
+Then verifies agents appear in `~/.openclaw/openclaw.json` under `agents.list`.
+
+If `agents.json` is missing or empty, the agent MUST first check whether agency-agents-zh is installed. If not, instruct the user with the manual steps above. Do NOT attempt to orchestrate without agents.
+
 ## How It Works
 
 The main agent, equipped with this skill, becomes an orchestrator:
@@ -27,12 +54,12 @@ For factual, time-sensitive, or comparative tasks, agents should rely on live we
 
 ### When to search the web
 
-| Scenario | Who searches |
-|----------|-------------|
+| Scenario                                            | Who searches                                |
+| --------------------------------------------------- | ------------------------------------------- |
 | Factual claims, current data, time-sensitive topics | Orchestrator (pre-research) + domain agents |
-| Comparison / ranking / landscape surveys | Orchestrator (pre-research) + domain agents |
-| Research & Analysis or Content Creation archetypes | Domain agents |
-| Technical Writing with version-specific details | Domain agents |
+| Comparison / ranking / landscape surveys            | Orchestrator (pre-research) + domain agents |
+| Research & Analysis or Content Creation archetypes  | Domain agents                               |
+| Technical Writing with version-specific details     | Domain agents                               |
 
 ### Pre-research (orchestrator)
 
@@ -54,16 +81,16 @@ Do NOT jump from "receive task" directly to "look up agents". Without first clas
 
 Every task MUST be classified into one of these archetypes BEFORE agent selection. The archetype determines the **primary agent role** and whether domain-expert agents play lead or supporting roles.
 
-| Archetype | Typical Keywords | Agent Selection Strategy | Example |
-|-----------|-----------------|--------------------------|---------|
-| **Content Creation** | write article, blog post, essay, deep-dive, long-form, copywriting, storytelling | Lead: narrative/creative agents. Supporting: domain experts for fact-checking. | "Write a deep-dive article about AI Agent trends" |
-| **Research & Analysis** | analyze, research, investigate, evaluate, feasibility, industry report, market study | Lead: research + domain experts. Multi-perspective parallel. | "Analyze the feasibility of an AI note-taking app" |
-| **Technical Writing** | technical docs, README, API docs, design docs, spec | Lead: technical writer. Supporting: relevant engineering roles. | "Write API documentation for this service" |
-| **Engineering** | review code, fix bug, refactor, optimize, implement feature | Lead: language/framework-specific engineer. Supporting: security, testing. | "Review this PR for security and performance" |
-| **Product Design** | design, UI, UX, prototype, product spec, wireframe | Lead: product manager or designer. Supporting: UX researcher. | "Design a SaaS pricing page" |
-| **Business Strategy** | business plan, pricing, go-to-market, funding, monetization | Lead: product manager or strategist. Supporting: finance, marketing. | "Plan a go-to-market strategy for a B2B SaaS" |
-| **Code Generation** | write code, build, implement, scaffold, create app | Lead: language/framework-specific engineer (single agent typically). | "Build a REST API with FastAPI" |
-| **Multi-Perspective Audit** | review holistically, due diligence, full assessment | Lead: domain-general coordinator. Parallel specialists. | "Full technical due diligence on this startup" |
+| Archetype                         | Typical Keywords                                                                     | Agent Selection Strategy                                                       | Example                                            |
+| --------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | -------------------------------------------------- |
+| **Content Creation**        | write article, blog post, essay, deep-dive, long-form, copywriting, storytelling     | Lead: narrative/creative agents. Supporting: domain experts for fact-checking. | "Write a deep-dive article about AI Agent trends"  |
+| **Research & Analysis**     | analyze, research, investigate, evaluate, feasibility, industry report, market study | Lead: research + domain experts. Multi-perspective parallel.                   | "Analyze the feasibility of an AI note-taking app" |
+| **Technical Writing**       | technical docs, README, API docs, design docs, spec                                  | Lead: technical writer. Supporting: relevant engineering roles.                | "Write API documentation for this service"         |
+| **Engineering**             | review code, fix bug, refactor, optimize, implement feature                          | Lead: language/framework-specific engineer. Supporting: security, testing.     | "Review this PR for security and performance"      |
+| **Product Design**          | design, UI, UX, prototype, product spec, wireframe                                   | Lead: product manager or designer. Supporting: UX researcher.                  | "Design a SaaS pricing page"                       |
+| **Business Strategy**       | business plan, pricing, go-to-market, funding, monetization                          | Lead: product manager or strategist. Supporting: finance, marketing.           | "Plan a go-to-market strategy for a B2B SaaS"      |
+| **Code Generation**         | write code, build, implement, scaffold, create app                                   | Lead: language/framework-specific engineer (single agent typically).           | "Build a REST API with FastAPI"                    |
+| **Multi-Perspective Audit** | review holistically, due diligence, full assessment                                  | Lead: domain-general coordinator. Parallel specialists.                        | "Full technical due diligence on this startup"     |
 
 ### Decision Heuristic
 
@@ -79,13 +106,13 @@ When the task says "write an article about X analysis", ask yourself:
 
 These keywords frequently span multiple archetypes. When detected, the orchestrator MUST ask for clarification before selecting agents:
 
-| Ambiguous Keyword | Possible Archetypes | What to Clarify |
-|-------------------|-------------------|-----------------|
-| "analysis article" / "deep analysis article" | Content Creation OR Research & Analysis | Target audience? Publishing channel? |
-| "design" / "design a solution" | Product Design OR Engineering OR Business Strategy | What kind of design? |
-| "evaluate" / "assess" | Research & Analysis OR Engineering | From which perspective? |
-| "plan" / "proposal" | Business Strategy OR Product Design OR Engineering | Plan for what? |
-| "build" / "create" | Code Generation OR Product Design OR Content Creation | Build what exactly? |
+| Ambiguous Keyword                            | Possible Archetypes                                   | What to Clarify                      |
+| -------------------------------------------- | ----------------------------------------------------- | ------------------------------------ |
+| "analysis article" / "deep analysis article" | Content Creation OR Research & Analysis               | Target audience? Publishing channel? |
+| "design" / "design a solution"               | Product Design OR Engineering OR Business Strategy    | What kind of design?                 |
+| "evaluate" / "assess"                        | Research & Analysis OR Engineering                    | From which perspective?              |
+| "plan" / "proposal"                          | Business Strategy OR Product Design OR Engineering    | Plan for what?                       |
+| "build" / "create"                           | Code Generation OR Product Design OR Content Creation | Build what exactly?                  |
 
 ### Clarification Protocol
 
@@ -97,9 +124,11 @@ When ambiguity is detected:
 4. If the user's profile strongly suggests one archetype, **still confirm** if ambiguity crosses the Content/Research boundary
 
 **Bad (multiple rounds):**
+
 > "Who is the audience?" → wait → "What format?" → wait → "How technical?"
 
 **Good (single round):**
+
 > "Target audience and channel for this article? e.g., general readers on Zhihu/WeChat (Content Creation route), or technical decision-makers as an internal report (Research route)?"
 
 ## Orchestration Patterns
@@ -179,36 +208,36 @@ User: "Write a deep-dive article about AI Agent trends"
 
 **Key distinction from Pattern 5 (Research):**
 
-| Dimension | Pattern 5 (Research) | Pattern 6 (Content Creation) |
-|-----------|---------------------|------------------------------|
-| Primary goal | Evidence, accuracy, completeness | Engagement, readability, impact |
-| Domain experts | Lead role | Supporting role (fact-check only) |
-| Output format | Structured report with sections | Narrative with hooks, flow, voice |
-| Success metric | Decision-makers can act on it | Readers finish it and share it |
+| Dimension      | Pattern 5 (Research)             | Pattern 6 (Content Creation)      |
+| -------------- | -------------------------------- | --------------------------------- |
+| Primary goal   | Evidence, accuracy, completeness | Engagement, readability, impact   |
+| Domain experts | Lead role                        | Supporting role (fact-check only) |
+| Output format  | Structured report with sections  | Narrative with hooks, flow, voice |
+| Success metric | Decision-makers can act on it    | Readers finish it and share it    |
 
 ## Agent Index
 
 The lookup table in `agents.json` maps every configured agent to:
 
-| Field | Description |
-|-------|-------------|
-| `agentId` | Agent ID in openclaw.json — used with sessions_spawn |
-| `name_zh` | Chinese name (from agency-agents-zh README) |
+| Field           | Description                                                      |
+| --------------- | ---------------------------------------------------------------- |
+| `agentId`     | Agent ID in openclaw.json — used with sessions_spawn            |
+| `name_zh`     | Chinese name (from agency-agents-zh README)                      |
 | `description` | Detailed capability summary extracted from agent .md frontmatter |
-| `expertise` | Key skills (from README table) |
-| `scenario` | Use case (from README table) |
-| `section` | Department grouping |
+| `expertise`   | Key skills (from README table)                                   |
+| `scenario`    | Use case (from README table)                                     |
+| `section`     | Department grouping                                              |
 
 Data sources: agency-agents-zh (194 agents) + agency-agents upstream (21 agents).
 
 ## Usage Commands
 
-| Command | Description |
-|---------|-------------|
-| `/agents` | List all agents grouped by department |
-| `/agents <dept>` | Filter by department |
-| `/agent search <keyword>` | Search agents by keyword |
-| `/agent <id> <task>` | Explicitly invoke one specific agent |
+| Command                     | Description                           |
+| --------------------------- | ------------------------------------- |
+| `/agents`                 | List all agents grouped by department |
+| `/agents <dept>`          | Filter by department                  |
+| `/agent search <keyword>` | Search agents by keyword              |
+| `/agent <id> <task>`      | Explicitly invoke one specific agent  |
 
 For most tasks, no command is needed. Describe the task naturally and the main agent will determine the orchestration plan.
 
