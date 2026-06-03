@@ -4,6 +4,8 @@ An OpenClaw skill that discovers agents configured in `openclaw.json` and orches
 
 215 agent descriptions sourced from [agency-agents-zh](https://github.com/jnMetaCode/agency-agents-zh) and [agency-agents](https://github.com/msitarzewski/agency-agents).
 
+Skill in ClawHub [Agency Agents Router — ClawHub](https://clawhub.ai/staok/agency-agents-router)。
+
 ## Prerequisites
 
 The agents themselves must be installed first. Follow the [agency-agents-zh setup guide](https://github.com/jnMetaCode/agency-agents-zh#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B):
